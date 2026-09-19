@@ -1,0 +1,98 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import Blog from './Blog'
+
+const blog = {
+  id: '123',
+  title: 'Full Stack Open',
+  author: 'Soumya',
+  url: 'https://fullstackopen.com',
+  likes: 5,
+  user: {
+    id: 'user123',
+    username: 'soumya',
+    name: 'Soumya'
+  }
+}
+
+const user = {
+  username: 'soumya',
+  name: 'Soumya'
+}
+
+test('renders title and author, but does not render url or likes by default', () => {
+  const updateBlog = vi.fn()
+  const deleteBlog = vi.fn()
+
+  render(
+    <Blog
+      blog={blog}
+      user={user}
+      updateBlog={updateBlog}
+      deleteBlog={deleteBlog}
+    />
+  )
+
+  expect(screen.getByText('Full Stack Open Soumya')).toBeDefined()
+
+  expect(
+    screen.queryByText('https://fullstackopen.com')
+  ).not.toBeInTheDocument()
+
+  expect(
+    screen.queryByText('likes 5')
+  ).not.toBeInTheDocument()
+})
+
+test('shows url and likes after clicking view', async () => {
+  const updateBlog = vi.fn()
+  const deleteBlog = vi.fn()
+
+  const userEventInstance = userEvent.setup()
+
+  render(
+    <Blog
+      blog={blog}
+      user={user}
+      updateBlog={updateBlog}
+      deleteBlog={deleteBlog}
+    />
+  )
+
+  const viewButton = screen.getByText('view')
+
+  await userEventInstance.click(viewButton)
+
+  expect(
+    screen.getByText('https://fullstackopen.com')
+  ).toBeDefined()
+
+  expect(
+    screen.getByText('likes 5')
+  ).toBeDefined()
+})
+
+test('like button calls event handler twice when clicked twice', async () => {
+  const updateBlog = vi.fn()
+  const deleteBlog = vi.fn()
+
+  const userEventInstance = userEvent.setup()
+
+  render(
+    <Blog
+      blog={blog}
+      user={user}
+      updateBlog={updateBlog}
+      deleteBlog={deleteBlog}
+    />
+  )
+
+  await userEventInstance.click(screen.getByText('view'))
+
+  const likeButton = screen.getByText('like')
+
+  await userEventInstance.click(likeButton)
+  await userEventInstance.click(likeButton)
+
+  expect(updateBlog.mock.calls).toHaveLength(2)
+})
