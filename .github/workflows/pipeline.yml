@@ -15,17 +15,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install backend dependencies
         run: npm install
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm install
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
       - name: Run frontend tests
         run: |
           cd frontend
-          npm test -- --run
+          npm test
       - name: Build frontend production bundle
         run: |
           cd frontend
